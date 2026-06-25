@@ -1,0 +1,52 @@
+---
+# ============================================================================
+#  cPanel Git™ Version Control — deployment pipeline
+#  App : Prestige Financial Concierge (Laravel 10 / PHP 8.x)
+#
+#  Model: repo is cloned to a PRIVATE dir (e.g. /home/prestig5/repositories/chantal).
+#         On "Pull or Deploy" cPanel runs the tasks below, which copy the app
+#         into the live web root and run composer + DB migrations + caching.
+#
+#  Preserved across every deploy (never overwritten / deleted):
+#    - the live .env in the web root          (secrets, DB creds, API keys)
+#    - storage/app/public  (user uploads)
+#    - storage/framework    (sessions, cache, compiled views)
+#    - storage/logs
+#
+#  PREREQUISITES (one-time, done on the server):
+#    - /home/prestig5/public_html/.env exists and is filled in for production
+#    - the database named in that .env already exists in cPanel > MySQL Databases
+# ============================================================================
+deployment:
+  tasks:
+    # --- 1. Paths & binaries -------------------------------------------------
+    - export DEPLOYPATH=/home/prestig5/public_html
+    - export PHP=$(command -v ea-php83 || command -v ea-php82 || command -v ea-php81 || command -v php)
+    - export COMPOSER=/opt/cpanel/composer/bin/composer; [ -f "$COMPOSER" ] || export COMPOSER=$(command -v composer)
+    - echo "==> Deploying to $DEPLOYPATH  (PHP=$PHP)"
+
+    # --- 2. Copy the application into the web root ---------------------------
+    #     --delete keeps the web root clean of removed files; the excludes
+    #     protect secrets, third-party deps and all runtime data.
+    - /usr/bin/rsync -a --delete --exclude='.git/' --exclude='.env' --exclude='/vendor/' --exclude='/node_modules/' --exclude='/storage/app/public/' --exclude='/storage/framework/' --exclude='/storage/logs/' --exclude='/bootstrap/cache/' --exclude='error_log' ./ "$DEPLOYPATH/"
+
+    # --- 3. Ensure writable runtime directories exist -----------------------
+    - /bin/mkdir -p "$DEPLOYPATH/storage/framework/cache/data" "$DEPLOYPATH/storage/framework/sessions" "$DEPLOYPATH/storage/framework/views" "$DEPLOYPATH/storage/app/public" "$DEPLOYPATH/storage/logs" "$DEPLOYPATH/bootstrap/cache"
+    - /bin/chmod -R ug+rwX "$DEPLOYPATH/storage" "$DEPLOYPATH/bootstrap/cache"
+
+    # --- 4. Install PHP dependencies (production) ----------------------------
+    - cd "$DEPLOYPATH" && $PHP $COMPOSER install --no-dev --optimize-autoloader --no-interaction --prefer-dist
+
+    # --- 5. Run database migrations -----------------------------------------
+    - cd "$DEPLOYPATH" && $PHP artisan migrate --force
+    #   First deploy only — uncomment to seed idempotent reference data:
+    # - cd "$DEPLOYPATH" && $PHP artisan db:seed --force
+
+    # --- 6. Link storage & (re)build production caches ----------------------
+    - cd "$DEPLOYPATH" && $PHP artisan storage:link || true
+    - cd "$DEPLOYPATH" && $PHP artisan optimize:clear
+    - cd "$DEPLOYPATH" && $PHP artisan config:cache
+    - cd "$DEPLOYPATH" && $PHP artisan route:cache
+    - cd "$DEPLOYPATH" && $PHP artisan view:cache
+
+    - echo "==> Deployment complete."
