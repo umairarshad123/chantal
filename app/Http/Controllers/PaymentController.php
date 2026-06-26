@@ -18,6 +18,10 @@ class PaymentController extends Controller
         'standard'  => ['name' => 'Standard Plan',       'amount' => 497.00],
         'fasttrack' => ['name' => 'Fast Track Plan',     'amount' => 797.00],
         'vip'       => ['name' => 'VIP Credit Rebuild',  'amount' => 997.00],
+        // Internal $5 live-transaction test. Not linked anywhere on the site;
+        // reachable only via /checkout?plan=test. Flows through the exact same
+        // charge → enrollment → payment → webhook → dashboard pipeline.
+        'test'      => ['name' => 'Test Product ($5)',   'amount' => 5.00],
     ];
 
     private function isProduction(): bool

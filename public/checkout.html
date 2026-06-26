@@ -256,6 +256,23 @@ var PLANS = {
     was: 1194,
     label: 'VIP program fee',
     fine: 'One-time program fee · dedicated specialist included.'
+  },
+  /* Internal $5 live-transaction test — reachable only via ?plan=test. Not linked anywhere on the site. */
+  test: {
+    tag: 'Internal Test',
+    name: 'Test Product ($5)',
+    desc: 'Internal $5 live transaction used to verify the full payment, webhook and dashboard flow end-to-end. Not a real product — do not share this link publicly.',
+    inherit: null,
+    features: [
+      'Live $5 authorize & capture via Authorize.Net',
+      'Creates a paid client + captured payment row',
+      'Triggers the Authorize.Net webhook',
+      'Shows up in the admin dashboard like any sale'
+    ],
+    price: 5,
+    was: 5,
+    label: 'Test charge',
+    fine: 'One-time $5 test charge.'
   }
 };
 
