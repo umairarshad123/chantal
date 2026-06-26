@@ -1,18 +1,7 @@
 ---
-# cPanel Git Version Control deploy pipeline for Prestige Financial Concierge.
-# Repo is cloned to /home/prestig5/repositories/chantal; these tasks copy the
-# app into the live web root (/home/prestig5/public_html) and run composer +
-# migrations + caching. The live .env and all of storage/ are left untouched.
-# A full log of every deploy is written to /home/prestig5/deploy.log.
-# NOTE: route:cache is intentionally omitted — routes/web.php uses closures,
-# which Laravel cannot route-cache.
 deployment:
   tasks:
-    - echo "=== deploy start ===" > /home/prestig5/deploy.log 2>&1
-    - /usr/bin/rsync -av --exclude='.git/' --exclude='.env' --exclude='/storage/' --exclude='/vendor/' --exclude='/node_modules/' --exclude='/bootstrap/cache/' --exclude='error_log' ./ /home/prestig5/public_html/ >> /home/prestig5/deploy.log 2>&1
-    - cd /home/prestig5/public_html && /usr/local/bin/php /opt/cpanel/composer/bin/composer install --no-dev --optimize-autoloader --no-interaction >> /home/prestig5/deploy.log 2>&1 || true
-    - cd /home/prestig5/public_html && /usr/local/bin/php artisan migrate --force >> /home/prestig5/deploy.log 2>&1 || true
-    - cd /home/prestig5/public_html && /usr/local/bin/php artisan optimize:clear >> /home/prestig5/deploy.log 2>&1 || true
-    - cd /home/prestig5/public_html && /usr/local/bin/php artisan config:cache >> /home/prestig5/deploy.log 2>&1 || true
-    - cd /home/prestig5/public_html && /usr/local/bin/php artisan view:cache >> /home/prestig5/deploy.log 2>&1 || true
-    - echo "=== deploy done ===" >> /home/prestig5/deploy.log 2>&1
+    - /usr/bin/rsync -a --exclude=.git --exclude=.env --exclude=storage --exclude=vendor --exclude=node_modules --exclude=bootstrap/cache --exclude=error_log /home/prestig5/repositories/chantal/ /home/prestig5/public_html/
+    - /bin/touch /home/prestig5/deploy_ok.txt
+    - /usr/local/bin/php /home/prestig5/public_html/artisan migrate --force || true
+    - /usr/local/bin/php /home/prestig5/public_html/artisan optimize:clear || true
