@@ -3,9 +3,9 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>Secure Checkout — Prestige Financial Concierge</title>
-<meta name="description" content="Secure, bank-grade enrollment for Prestige Financial Concierge credit repair programs. 256-bit SSL encrypted checkout." />
-<meta name="robots" content="noindex" />
+<title>Secure Test Checkout ($5) — Prestige Financial Concierge</title>
+<meta name="description" content="Internal $5 test checkout." />
+<meta name="robots" content="noindex, nofollow" />
 <link rel="preconnect" href="https://fonts.googleapis.com" />
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
 <link href="https://fonts.googleapis.com/css2?family=Sora:wght@400;500;600;700;800&family=Inter:wght@300;400;500;600&family=Cormorant+Garamond:ital,wght@1,500;1,600&display=swap" rel="stylesheet" />
@@ -28,7 +28,7 @@
 <header class="co-head">
   <div class="wrap">
     <a href="/" class="brand"><img src="assets/logo.jpg" alt="Prestige Financial Concierge" /></a>
-    <a href="/#pricing" class="co-back">&larr; Back to plans</a>
+    <span class="co-back">Internal Test</span>
     <span class="co-lock">&#128274; <span class="lk-txt">Secure Checkout</span></span>
   </div>
 </header>
@@ -37,19 +37,13 @@
 <section class="co-hero">
   <div class="wrap">
     <span class="eyebrow" id="planEyebrow">Secure Enrollment</span>
-    <h1>One Step Away From <span class="gold-text">Better Credit</span>.</h1>
-    <p class="sub">Complete your enrollment below. Every detail is protected with bank-grade, end-to-end encryption.</p>
-
-    <div class="co-journey">
-      <div class="pt"><b>Today</b><span>Where you start</span></div>
-      <div class="arrow">&rarr;</div>
-      <div class="pt to"><b>Approved</b><span>Where we take you</span></div>
-    </div>
+    <h1>Internal <span class="gold-text">$5 Test</span> Checkout.</h1>
+    <p class="sub">This is an internal $5 live-transaction test. Complete the form below to run a real charge end-to-end.</p>
 
     <div class="co-badges">
-      <span class="bdg">&#127963;&#65039; <b>FCRA</b>-Compliant</span>
-      <span class="bdg">&#9889; <b>Same-Day</b> Start</span>
-      <span class="bdg">&#11088; <b>4.9 / 5</b> Client Rating</span>
+      <span class="bdg">&#9889; <b>Live</b> $5 Charge</span>
+      <span class="bdg">&#128202; <b>Dashboard</b> Recorded</span>
+      <span class="bdg">&#128279; <b>Webhook</b> Fires</span>
       <span class="bdg">&#128274; <b>256-Bit</b> SSL</span>
     </div>
   </div>
@@ -191,80 +185,33 @@
 <div class="co-success" id="coSuccess">
   <div class="box">
     <div class="seal">&#10003;</div>
-    <h2>Welcome to <span class="gold-text">Prestige</span></h2>
-    <p id="successMsg">Your enrollment is confirmed. A welcome email with your agreement and portal access is on its way.</p>
+    <h2><span class="gold-text">Test</span> Charge Approved</h2>
+    <p id="successMsg">The $5 test charge was approved. Check the admin dashboard — it should appear under Paid Clients, Payments and Webhooks.</p>
     <a href="/" class="btn btn-gold">Return Home</a>
   </div>
 </div>
 
 <script>
-/* ---------- Plan data (mirrors the site's pricing section) ---------- */
-var PLANS = {
-  standard: {
-    tag: 'Standard Plan',
-    name: 'Standard Plan',
-    desc: 'Credit Repair Essentials — a single flat program fee. A focused 3-bureau clean-up for people with a few negative accounts.',
-    inherit: null,
-    features: [
-      '3-bureau dispute strategy',
-      'Negative item review & challenge',
-      'Collections assistance',
-      'Inquiry removal strategy',
-      'Score improvement roadmap',
-      'Monthly progress updates',
-      'Client portal access'
-    ],
-    price: 497,
-    was: 694,
-    label: 'Standard program fee',
-    fine: 'One-time program fee · monthly progress updates included.'
-  },
-  fasttrack: {
-    tag: 'Fast Track Plan',
-    name: 'Fast Track Plan',
-    desc: 'For clients who want faster results and funding preparation. Everything in Standard, accelerated.',
-    inherit: 'Everything in Standard, plus:',
-    features: [
-      'Priority dispute processing',
-      'Accelerated dispute cycles',
-      'Late payment challenges',
-      'Charge-off strategy',
-      'Debt validation letters',
-      'Credit utilization optimization',
-      'Funding readiness review'
-    ],
-    price: 797,
-    was: 994,
-    label: 'Fast Track program fee',
-    fine: 'One-time program fee · priority processing included.'
-  },
-  vip: {
-    tag: 'VIP Credit Rebuild',
-    name: 'VIP Credit Rebuild',
-    desc: 'For serious clients preparing for a home, vehicle, or business funding. Fully done-for-you, white-glove case management.',
-    inherit: 'Everything in Fast Track, plus:',
-    features: [
-      'Dedicated account specialist',
-      'Done-for-you case management',
-      'Unlimited support during program',
-      'Funding strategy consultation',
-      'Tradeline & utilization review',
-      'Mortgage & business funding prep',
-      'Priority communication'
-    ],
-    price: 997,
-    was: 1194,
-    label: 'VIP program fee',
-    fine: 'One-time program fee · dedicated specialist included.'
-  }
+/* ---------- Single hardcoded plan: the $5 internal test. No query param, no fallback. ---------- */
+var PLAN_KEY = 'test';
+var P = {
+  tag: 'Internal Test',
+  name: 'Test Product ($5)',
+  desc: 'Internal $5 live transaction used to verify the full payment, webhook and dashboard flow end-to-end. Not a real product.',
+  inherit: null,
+  features: [
+    'Live $5 authorize & capture via Authorize.Net',
+    'Creates a paid client + captured payment row',
+    'Triggers the Authorize.Net webhook',
+    'Shows up in the admin dashboard like any sale'
+  ],
+  price: 5,
+  was: 5,
+  label: 'Test charge',
+  fine: 'One-time $5 test charge.'
 };
 
-function getParam(n){ return new URLSearchParams(window.location.search).get(n); }
 function money(n){ return '$' + n.toLocaleString('en-US'); }
-
-var key = (getParam('plan') || 'standard').toLowerCase();
-if(!PLANS[key]) key = 'standard';
-var P = PLANS[key];
 
 document.getElementById('sumTag').textContent = P.tag;
 document.getElementById('sumName').textContent = P.name;
@@ -275,7 +222,7 @@ document.getElementById('sumPrice').textContent = money(P.price);
 document.getElementById('sumSave').textContent = 'Save ' + money(P.was - P.price);
 document.getElementById('sumPlanLabel').textContent = P.label;
 document.getElementById('sumFine').textContent = P.fine;
-document.title = 'Secure Checkout · ' + P.name + ' — Prestige Financial Concierge';
+document.title = 'Secure Test Checkout · ' + P.name + ' — Prestige Financial Concierge';
 
 var featHtml = '';
 if(P.inherit){ featHtml += '<li class="inherit">' + P.inherit + '</li>'; }
@@ -285,7 +232,7 @@ P.features.forEach(function(f){
 document.getElementById('sumFeat').innerHTML = featHtml;
 
 document.getElementById('legalText').innerHTML =
-  '<b>Compliance Notice.</b> Prestige Financial Concierge is a credit repair organization as defined under the Credit Repair Organizations Act (CROA), 15 U.S.C. § 1679 et seq. In full compliance with CROA, no fees are collected until after the contracted services have been performed. You have the right to dispute inaccurate information in your credit file yourself at no cost, and to cancel your contract within three business days. A confirmation email and written agreement are sent immediately after enrollment.';
+  '<b>Internal test.</b> This page runs a real $5 charge through Authorize.Net to verify the live payment, webhook and dashboard pipeline end-to-end. Refund the charge from the Authorize.Net dashboard after testing.';
 
 /* expiry years */
 var yearSel = document.getElementById('expYear');
@@ -357,14 +304,14 @@ document.getElementById('coForm').addEventListener('submit', function(e){
       return;
     }
 
-    // 2) Send only the opaque token + billing details to our server to complete the charge.
+    // 2) Send only the opaque token + billing details to our server to complete the $5 charge.
     fetch('/api/checkout/pay', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
       body: JSON.stringify({
         opaqueDataDescriptor: resp.opaqueData.dataDescriptor,
         opaqueDataValue:      resp.opaqueData.dataValue,
-        plan:    key,
+        plan:    PLAN_KEY,
         first:   val('first'),   last:  val('last'),  email: val('email'), phone: val('phone'),
         address: val('address'), city:  val('city'),  state: val('state'), zip:   val('zip'),
         agree_terms: chk('agree_terms'), agree_privacy: chk('agree_privacy'), agree_marketing: chk('agree_marketing')
@@ -374,7 +321,7 @@ document.getElementById('coForm').addEventListener('submit', function(e){
     .then(function(res){
       if(res && res.ok){
         document.getElementById('successMsg').innerHTML =
-          'Your enrollment in the <b>' + P.name + '</b> is confirmed and your payment was <b>approved</b>. A welcome email with your written agreement and secure portal access is on its way.';
+          'The <b>$5 test charge</b> was <b>approved</b> (transaction ' + (res.transactionId || '—') + '). Check the admin dashboard — it should appear under Paid Clients, Payments and Webhooks.';
         document.getElementById('coSuccess').classList.add('show');
         window.scrollTo({top:0, behavior:'smooth'});
       } else {
