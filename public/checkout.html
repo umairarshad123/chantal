@@ -11,6 +11,9 @@
 <link href="https://fonts.googleapis.com/css2?family=Sora:wght@400;500;600;700;800&family=Inter:wght@300;400;500;600&family=Cormorant+Garamond:ital,wght@1,500;1,600&display=swap" rel="stylesheet" />
 <link rel="stylesheet" href="assets/styles.css" />
 <link rel="stylesheet" href="assets/checkout.css" />
+<!-- Authorize.Net Accept.js — preloaded up-front (production) so window.Accept is
+     ready long before the form is filled. No waiting, no race on submit. -->
+<script src="https://js.authorize.net/v3/Accept.js" defer></script>
 </head>
 <body class="co-body">
 
@@ -301,25 +304,44 @@ card.addEventListener('input', function(){
   card.value = v.replace(/(.{4})/g,'$1 ').trim();
 });
 
-/* ---------- Authorize.Net Accept.js (card data is tokenized in-browser) ---------- */
-var ANET = { ready:false, apiLoginID:null, clientKey:null };
-fetch('/api/checkout/config').then(function(r){return r.json();}).then(function(c){
-  ANET.apiLoginID = c.apiLoginID; ANET.clientKey = c.clientKey;
-  if(!c.acceptJsUrl || !c.apiLoginID || !c.clientKey){ return; }
-  var s = document.createElement('script');
-  s.src = c.acceptJsUrl; s.async = true;
-  s.onload = function(){ ANET.ready = true; };
-  document.head.appendChild(s);
-}).catch(function(){});
+/* ---------- Authorize.Net Accept.js (card data is tokenized in-browser) ----------
+   Accept.js is loaded up-front in <head>, so window.Accept is ready early. We
+   only fetch the public keys here (needed to tokenize), and we keep the pay
+   button DISABLED until both the keys and window.Accept exist — so a click can
+   never happen before payment is ready. No "still initializing" for the user. */
+var ANET = { apiLoginID:null, clientKey:null };
 
 var payBtn   = document.getElementById('payBtn');
 var payError = document.getElementById('payError');
 function showPayError(msg){ payError.textContent = msg; payError.classList.add('show'); }
 function clearPayError(){ payError.textContent = ''; payError.classList.remove('show'); }
-function setProcessing(on){
-  payBtn.disabled = on;
-  payBtn.innerHTML = on ? '&#9203;&nbsp; Processing&hellip;' : '&#128274;&nbsp; Complete Secure Checkout';
+function paymentReady(){ return !!(window.Accept && ANET.apiLoginID && ANET.clientKey); }
+function refreshPayBtn(){
+  if(paymentReady()){
+    payBtn.disabled = false;
+    payBtn.innerHTML = '&#128274;&nbsp; Complete Secure Checkout';
+  } else {
+    payBtn.disabled = true;
+    payBtn.innerHTML = '&#9203;&nbsp; Loading secure payment&hellip;';
+  }
 }
+function setProcessing(on){
+  if(on){ payBtn.disabled = true; payBtn.innerHTML = '&#9203;&nbsp; Processing&hellip;'; }
+  else { refreshPayBtn(); }
+}
+refreshPayBtn();
+
+/* Fetch the public keys needed for tokenization, then re-evaluate readiness. */
+fetch('/api/checkout/config').then(function(r){return r.json();}).then(function(c){
+  ANET.apiLoginID = c.apiLoginID; ANET.clientKey = c.clientKey;
+  refreshPayBtn();
+}).catch(function(){});
+
+/* Deferred Accept.js may finish after this script runs — poll briefly until
+   window.Accept exists, then enable the button. */
+var acceptWait = setInterval(function(){
+  if(window.Accept){ clearInterval(acceptWait); refreshPayBtn(); }
+}, 200);
 
 document.getElementById('coForm').addEventListener('submit', function(e){
   e.preventDefault();
@@ -329,8 +351,9 @@ document.getElementById('coForm').addEventListener('submit', function(e){
   function val(n){ var el = f.querySelector('[name="'+n+'"]'); return el ? el.value : ''; }
   function chk(n){ var el = f.querySelector('[name="'+n+'"]'); return el ? el.checked : false; }
 
-  if(!window.Accept || !ANET.ready){
-    showPayError('Secure payment is still initializing — please try again in a moment.');
+  if(!paymentReady()){
+    showPayError('Secure payment is still loading — one moment...');
+    refreshPayBtn();
     return;
   }
 
